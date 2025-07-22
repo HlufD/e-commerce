@@ -2,11 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 
+	"github.com/HlufD/products-ms/internal/adapters/left/http/dto"
 	"github.com/HlufD/products-ms/internal/core/domain"
 	"github.com/HlufD/products-ms/internal/core/usecases"
 	"github.com/HlufD/products-ms/shared"
@@ -31,14 +33,24 @@ func (pc *ProductController) RegisterRoutes(router chi.Router) {
 }
 
 func (pc *ProductController) CreateProduct(w http.ResponseWriter, r *http.Request) {
-	var product domain.Product
+	var product *domain.Product
+	var createProductDto dto.CreateProduct
 
-	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&createProductDto); err != nil {
 		shared.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
+	// validate it
 
-	createdProduct, err := pc.productService.CreateProduct(&product)
+	if err := shared.Validate(createProductDto); err != nil {
+		shared.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// map dto to entity
+	product = createProductDto.MapToDomainEntity()
+
+	createdProduct, err := pc.productService.CreateProduct(product)
 	if err != nil {
 		shared.RespondWithError(w, http.StatusInternalServerError, "Failed to create product")
 		return
@@ -79,14 +91,26 @@ func (pc *ProductController) GetProductByID(w http.ResponseWriter, r *http.Reque
 func (pc *ProductController) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	var product domain.UpdateProduct
+	var product *domain.UpdateProduct
+	var updatedProductDto dto.UpdateProduct
 
-	if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&updatedProductDto); err != nil {
 		shared.RespondWithError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
+	// validate
+	if err := shared.Validate(updatedProductDto); err != nil {
+		shared.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
-	updatedProduct, err := pc.productService.UpdateProduct(id, &product)
+	// map dto to entity
+	product = updatedProductDto.MapToDomainEntity()
+
+	updatedProduct, err := pc.productService.UpdateProduct(id, product)
+
+	log.Println(updatedProduct)
+
 	if err != nil {
 		shared.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
