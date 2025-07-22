@@ -1,0 +1,143 @@
+basePath: /
+definitions:
+  github_com_HlufD_users-ms_internals_adapters_left_http_dto.Login:
+    description: User login request payload
+    properties:
+      password:
+        description: '@Example: "P@ssw0rd123"'
+        example: P@ssw0rd123
+        minLength: 5
+        type: string
+      username:
+        description: '@Example: "john_doe"'
+        example: john_doe
+        maxLength: 20
+        minLength: 3
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  github_com_HlufD_users-ms_internals_adapters_left_http_dto.RegisterUserDto:
+    description: User registration request payload
+    properties:
+      email:
+        description: '@Example: "user@example.com"'
+        example: user@example.com
+        format: email
+        type: string
+      password:
+        description: '@Example: "P@ssw0rd123"'
+        example: P@ssw0rd123
+        minLength: 6
+        type: string
+      username:
+        description: '@Example: "john_doe"'
+        example: john_doe
+        maxLength: 20
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+  github_com_HlufD_users-ms_internals_domain.Token:
+    properties:
+      token:
+        type: string
+    type: object
+  github_com_HlufD_users-ms_internals_domain.User:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      updatedAt:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:4000
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: API for user authentication and management
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Users Microservice API
+  version: "1.0"
+paths:
+  /api/v1/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HlufD_users-ms_internals_adapters_left_http_dto.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Authentication token
+          schema:
+            $ref: '#/definitions/github_com_HlufD_users-ms_internals_domain.Token'
+        "400":
+          description: Invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Authenticate user
+      tags:
+      - authentication
+  /api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Registration data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HlufD_users-ms_internals_adapters_left_http_dto.RegisterUserDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully created user
+          schema:
+            $ref: '#/definitions/github_com_HlufD_users-ms_internals_domain.User'
+        "400":
+          description: Invalid request format
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: User already exists
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register a new user
+      tags:
+      - authentication
+schemes:
+- http
+swagger: "2.0"

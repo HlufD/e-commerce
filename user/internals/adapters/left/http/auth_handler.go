@@ -5,38 +5,49 @@ import (
 	"net/http"
 
 	"github.com/HlufD/users-ms/common"
+	"github.com/HlufD/users-ms/internals/adapters/left/http/dto"
 	"github.com/HlufD/users-ms/internals/application"
 	"github.com/HlufD/users-ms/internals/domain"
 )
 
+// AuthHandler handles authentication requests
 type AuthHandler struct {
 	authService application.AuthService
 }
 
+// NewAuthHandler creates a new AuthHandler instance
 func NewAuthHandler(authService application.AuthService) *AuthHandler {
 	return &AuthHandler{
 		authService,
 	}
 }
 
+// Register godoc
+// @Summary Register a new user
+// @Description Create a new user account
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param request body dto.RegisterUserDto true "Registration data"
+// @Success 201 {object} domain.User "Successfully created user"
+// @Failure 400 {object} map[string]interface{} "Invalid request format"
+// @Failure 409 {object} map[string]interface{} "User already exists"
+// @Router /api/v1/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Username string `json:"username"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var user domain.Registration
+	var registerUserDto dto.RegisterUserDto
 
-	user := domain.Registration{
-		Email:    req.Email,
-		Username: req.Username,
-		Password: req.Password,
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&registerUserDto); err != nil {
 		common.RespondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
+	if err := dto.Validate(registerUserDto); err != nil {
+		common.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	user = *registerUserDto.MapToDomainEntity(user)
 	createdUser, err := h.authService.Register(user)
 
 	if err != nil {
@@ -47,15 +58,32 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	common.RespondWithJSON(w, http.StatusCreated, createdUser)
 }
 
+// Login godoc
+// @Summary Authenticate user
+// @Description Login with email and password
+// @Tags authentication
+// @Accept json
+// @Produce json
+// @Param request body dto.Login true "Login credentials"
+// @Success 200 {object} domain.Token "Authentication token"
+// @Failure 400 {object} map[string]interface{} "Invalid credentials"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Router /api/v1/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-
+	var loginDto dto.Login
 	var creds domain.Credentials
 
-	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&loginDto); err != nil {
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 
+	if err := dto.Validate(loginDto); err != nil {
+		common.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	creds = *loginDto.MapToEntity(creds)
 	token, err := h.authService.Login(creds)
 
 	if err != nil {

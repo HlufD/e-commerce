@@ -5,6 +5,11 @@ import (
 	"net/http"
 )
 
+type ErrorResponse struct {
+	Error   bool   `json:"error" example:"true"`
+	Message string `json:"message" example:"Invalid request payload"`
+}
+
 func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -12,9 +17,9 @@ func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 }
 
 func RespondWithError(w http.ResponseWriter, code int, message string) {
-	errorResponse := map[string]interface{}{
-		"error":   true,
-		"message": message,
+	errorResponse := ErrorResponse{
+		Error:   true,
+		Message: message,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
