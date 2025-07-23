@@ -5,7 +5,7 @@ import "github.com/HlufD/payment-ms/internal/core/domain"
 type PaymentDTO struct {
 	OrderID       string  `json:"orderId" validate:"required,len=24,hexadecimal"`
 	Amount        float64 `json:"amount" validate:"required,gt=0"`
-	Status        string  `json:"status" validate:"required,oneof=pending paid failed"`
+	Status        string  `json:"status" validate:"required,oneof=pending paid failed cancelled"`
 	Method        string  `json:"method" validate:"required,oneof=credit_card paypal bank_transfer"`
 	TransactionID string  `json:"transactionId" validate:"required"`
 }

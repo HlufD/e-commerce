@@ -3,7 +3,7 @@ package dto
 import "github.com/HlufD/order-ms/internal/core/domain"
 
 type UpdateOrderDTO struct {
-	Status        *string         `json:"status,omitempty" validate:"omitempty,oneof=pending processing shipped completed cancelled"`
+	Status        *string         `json:"status,omitempty" validate:"omitempty"`
 	Items         *[]OrderItemDTO `json:"items,omitempty" validate:"omitempty,dive"`
 	TotalAmount   *float64        `json:"totalAmount,omitempty" validate:"omitempty,gt=0"`
 	PaymentMethod *string         `json:"paymentMethod,omitempty"`

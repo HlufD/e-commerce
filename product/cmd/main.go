@@ -4,14 +4,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	_ "github.com/HlufD/products-ms/cmd/docs"
 	"github.com/HlufD/products-ms/internal/adapters/left/http/controllers"
 	persistence "github.com/HlufD/products-ms/internal/adapters/right/persistence/mongo"
 	"github.com/HlufD/products-ms/internal/core/usecases"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -44,11 +42,6 @@ func main() {
 	productController := controllers.NewProductController(productService)
 
 	router := chi.NewRouter()
-
-	// Middlewares
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.Timeout(60 * time.Second))
 
 	// Register routes
 	productController.RegisterRoutes(router)

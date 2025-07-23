@@ -101,17 +101,19 @@ func (ou *OrderUseCase) UpdateOrder(orderID string, updatedOrder *domain.UpdateO
 
 		var products []*domain.Product
 		getProductURL := fmt.Sprintf("%s?ids=%s", os.Getenv("CHECK_AVAILABILITY"), strings.Join(productIDs, ","))
+
 		if err := ou.httpClient.Get(context.Background(), getProductURL, &products); err != nil {
 			return nil, fmt.Errorf("failed to fetch products: %w", err)
 		}
 
 		productMap := make(map[string]*domain.Product)
+
 		for _, p := range products {
 			productMap[p.ID] = p
 		}
 
 		var total float64
-		for _, item := range updatedOrder.Items {
+		for i, item := range updatedOrder.Items {
 			product, ok := productMap[item.ProductID]
 			if !ok {
 				return nil, fmt.Errorf("product not found: %s", item.ProductID)
@@ -119,6 +121,7 @@ func (ou *OrderUseCase) UpdateOrder(orderID string, updatedOrder *domain.UpdateO
 			if product.Stock < item.Quantity {
 				return nil, fmt.Errorf("insufficient stock for product: %s", product.ID)
 			}
+			updatedOrder.Items[i].Price = product.Price
 			total += float64(item.Quantity) * product.Price
 		}
 
