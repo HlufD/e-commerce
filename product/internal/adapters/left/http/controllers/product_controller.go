@@ -2,9 +2,8 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
-	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -28,7 +27,7 @@ func (pc *ProductController) RegisterRoutes(router chi.Router) {
 		r.Get("/", pc.GetAllProducts)
 		r.Get("/{id}", pc.GetProductByID)
 		r.Put("/{id}", pc.UpdateProduct)
-		r.Get("/{id}/availability", pc.CheckAvailability)
+		r.Get("/check-availability", pc.GetProductsWithMultipleIdsPassed)
 	})
 }
 
@@ -109,8 +108,6 @@ func (pc *ProductController) UpdateProduct(w http.ResponseWriter, r *http.Reques
 
 	updatedProduct, err := pc.productService.UpdateProduct(id, product)
 
-	log.Println(updatedProduct)
-
 	if err != nil {
 		shared.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -119,21 +116,23 @@ func (pc *ProductController) UpdateProduct(w http.ResponseWriter, r *http.Reques
 	shared.RespondWithJSON(w, http.StatusOK, updatedProduct)
 }
 
-func (pc *ProductController) CheckAvailability(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	q := r.URL.Query().Get("quantity")
-
-	quantity, err := strconv.Atoi(q)
-	if err != nil || quantity <= 0 {
-		shared.RespondWithError(w, http.StatusBadRequest, "Invalid or missing 'quantity' query parameter")
+func (pc *ProductController) GetProductsWithMultipleIdsPassed(w http.ResponseWriter, r *http.Request) {
+	// Get "ids" query param: ?ids=1,2,3
+	idsParam := r.URL.Query().Get("ids")
+	if idsParam == "" {
+		shared.RespondWithError(w, http.StatusBadRequest, "Missing 'ids' query parameter")
 		return
 	}
 
-	available, err := pc.productService.CheckAvailability(id, quantity)
+	// Split into slice
+	ids := strings.Split(idsParam, ",")
+
+	// Call service
+	products, err := pc.productService.GetProductsWithMultipleIdsPassed(ids)
 	if err != nil {
-		shared.RespondWithError(w, http.StatusInternalServerError, "Error checking availability")
+		shared.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	shared.RespondWithJSON(w, http.StatusOK, map[string]bool{"available": available})
+	shared.RespondWithJSON(w, http.StatusOK, products)
 }

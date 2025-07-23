@@ -108,3 +108,13 @@ func (au *AuthService) Register(registration domain.Registration) (*domain.User,
 
 	return user, nil
 }
+
+func (au *AuthService) Validate(token string) (string, error) {
+	id, err := au.token.Validate(token)
+
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}

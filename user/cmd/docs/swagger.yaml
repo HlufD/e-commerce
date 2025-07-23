@@ -42,6 +42,13 @@ definitions:
     - password
     - username
     type: object
+  github_com_HlufD_users-ms_internals_adapters_left_http_dto.ValidateUser:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
   github_com_HlufD_users-ms_internals_domain.Token:
     properties:
       token:
@@ -138,6 +145,34 @@ paths:
       summary: Register a new user
       tags:
       - authentication
+  /api/v1/validate:
+    post:
+      consumes:
+      - application/json
+      description: Validates a user based on token
+      parameters:
+      - description: User Token Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HlufD_users-ms_internals_adapters_left_http_dto.ValidateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: user_id
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Validate user token
+      tags:
+      - Auth
 schemes:
 - http
 swagger: "2.0"

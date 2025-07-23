@@ -93,3 +93,38 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	common.RespondWithJSON(w, http.StatusOK, token)
 }
+
+// Validate godoc
+// @Summary      Validate user token
+// @Description  Validates a user based on token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request body dto.ValidateUser true "User Token Payload"
+// @Success      200 {string} string "user_id"
+// @Failure      400 {object} map[string]string "Bad Request"
+// @Router       /api/v1/validate [post]
+func (h *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
+	var validationDto dto.ValidateUser
+
+	if err := json.NewDecoder(r.Body).Decode(&validationDto); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if err := dto.Validate(validationDto); err != nil {
+		common.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	id, err := h.authService.Validate(validationDto.Token)
+	if err != nil {
+		common.RespondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	response := map[string]string{
+		"userId": id,
+	}
+
+	common.RespondWithJSON(w, http.StatusOK, response)
+}

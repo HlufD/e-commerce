@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -55,4 +56,27 @@ func (pu *ProductUseCase) GetAllProducts() ([]*domain.Product, error) {
 
 func (pu *ProductUseCase) CheckAvailability(id string, quantity int) (bool, error) {
 	return pu.productRepository.CheckAvailability(id, quantity)
+}
+
+func (pu *ProductUseCase) GetProductsWithMultipleIdsPassed(ids []string) ([]*domain.Product, error) {
+	var products []*domain.Product
+	var notFoundIds []string
+
+	for _, id := range ids {
+		product, err := pu.GetProductById(id)
+		if err != nil {
+			if errors.Is(err, domain.ErrProductNotFound) {
+				notFoundIds = append(notFoundIds, id)
+				continue
+			}
+			return nil, err
+		}
+		products = append(products, product)
+	}
+
+	if len(notFoundIds) > 0 {
+		return nil, fmt.Errorf("products not found for IDs: %v", notFoundIds)
+	}
+
+	return products, nil
 }

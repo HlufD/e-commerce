@@ -50,7 +50,7 @@ func (jw *JWTAdapter) Validate(tokenString string) (string, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return jw.secret, nil
+		return []byte(jw.secret), nil
 	})
 
 	if err != nil {

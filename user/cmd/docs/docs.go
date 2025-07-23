@@ -117,6 +117,49 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/validate": {
+            "post": {
+                "description": "Validates a user based on token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Validate user token",
+                "parameters": [
+                    {
+                        "description": "User Token Payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_HlufD_users-ms_internals_adapters_left_http_dto.ValidateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "user_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -170,6 +213,17 @@ const docTemplate = `{
                     "maxLength": 20,
                     "minLength": 3,
                     "example": "john_doe"
+                }
+            }
+        },
+        "github_com_HlufD_users-ms_internals_adapters_left_http_dto.ValidateUser": {
+            "type": "object",
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
                 }
             }
         },

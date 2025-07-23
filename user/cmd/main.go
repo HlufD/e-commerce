@@ -56,6 +56,7 @@ func main() {
 	// Register routes
 	router.HandleFunc("POST /api/v1/register", authController.Register)
 	router.HandleFunc("POST /api/v1/login", authController.Login)
+	router.HandleFunc("POST /api/v1/validate", authController.Validate)
 
 	// Swagger route - must be registered on the main router
 	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
