@@ -6,14 +6,21 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/HlufD/products-ms/cmd/docs"
 	"github.com/HlufD/products-ms/internal/adapters/left/http/controllers"
 	persistence "github.com/HlufD/products-ms/internal/adapters/right/persistence/mongo"
 	"github.com/HlufD/products-ms/internal/core/usecases"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title Product Microservice API
+// @version 1.0
+// @description API for managing products
+// @host localhost:4001
+// @BasePath /api/v1
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -45,6 +52,10 @@ func main() {
 
 	// Register routes
 	productController.RegisterRoutes(router)
+
+	// Swagger route - must be registered on the main router
+	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
+	router.HandleFunc("GET /swagger/*", httpSwagger.WrapHandler)
 
 	port := os.Getenv("PORT")
 

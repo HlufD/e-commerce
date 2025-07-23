@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	_ "github.com/HlufD/users-ms/cmd/docs" // Make sure this path is correct
+	_ "github.com/HlufD/users-ms/cmd/docs"
 	httpAdapter "github.com/HlufD/users-ms/internals/adapters/left/http"
 	adapters "github.com/HlufD/users-ms/internals/adapters/right"
 	"github.com/HlufD/users-ms/internals/adapters/right/persistence/postgres"

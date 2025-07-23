@@ -1,0 +1,122 @@
+basePath: /api/v1
+definitions:
+  github_com_HlufD_payment-ms_internal_adapters_left_http_dto.PaymentDTO:
+    properties:
+      amount:
+        type: number
+      method:
+        enum:
+        - credit_card
+        - paypal
+        - bank_transfer
+        type: string
+      orderId:
+        type: string
+      status:
+        enum:
+        - pending
+        - paid
+        - failed
+        type: string
+      transactionId:
+        type: string
+    required:
+    - amount
+    - method
+    - orderId
+    - status
+    - transactionId
+    type: object
+  github_com_HlufD_payment-ms_internal_core_domain.Payment:
+    properties:
+      amount:
+        type: number
+      createdAt:
+        type: string
+      id:
+        type: string
+      method:
+        type: string
+      orderId:
+        type: string
+      status:
+        type: string
+      transactionId:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  shared.ErrorResponse:
+    properties:
+      error:
+        example: true
+        type: boolean
+      message:
+        example: Invalid request payload
+        type: string
+    type: object
+host: localhost:4004
+info:
+  contact: {}
+  description: This is a payment service for processing payments
+  title: Payment Service API
+  version: "1.0"
+paths:
+  /payments:
+    post:
+      consumes:
+      - application/json
+      description: Makes a payment and updates order status to success
+      parameters:
+      - description: Payment request body
+        in: body
+        name: payment
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HlufD_payment-ms_internal_adapters_left_http_dto.PaymentDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HlufD_payment-ms_internal_core_domain.Payment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+      summary: Create a new payment
+      tags:
+      - Payments
+  /payments/{id}:
+    get:
+      description: Returns payment information by payment ID
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HlufD_payment-ms_internal_core_domain.Payment'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+      summary: Get a payment by ID
+      tags:
+      - Payments
+swagger: "2.0"

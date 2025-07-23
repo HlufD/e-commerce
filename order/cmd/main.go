@@ -7,14 +7,27 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/HlufD/order-ms/cmd/docs"
 	adapters "github.com/HlufD/order-ms/internal/adapters/left/http"
 	"github.com/HlufD/order-ms/internal/adapters/left/http/controllers"
 	persistence "github.com/HlufD/order-ms/internal/adapters/right/persistence/mongo"
 	"github.com/HlufD/order-ms/internal/core/usecases"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
+// @title Order Service API
+// @version 1.0
+// @description API documentation for the Order service.
+// @host localhost:4003
+// @BasePath /api/v1
+// @schemes http
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token (e.g., "Bearer eyJhbGciOi...")
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -40,6 +53,10 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Mount("/api/v1/orders", orderController.Routes())
+
+	// Swagger route - must be registered on the main router
+	r.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
+	r.HandleFunc("GET /swagger/*", httpSwagger.WrapHandler)
 
 	port := ":4003"
 	fmt.Printf("Order service is running on http://localhost%s\n", port)

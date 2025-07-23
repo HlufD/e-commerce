@@ -1,0 +1,225 @@
+basePath: /api/v1
+definitions:
+  github_com_HlufD_order-ms_internal_adapters_left_http_dto.CreateOrderDTO:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/github_com_HlufD_order-ms_internal_adapters_left_http_dto.OrderItemDTO'
+        minItems: 1
+        type: array
+      paymentMethod:
+        type: string
+    required:
+    - items
+    - paymentMethod
+    type: object
+  github_com_HlufD_order-ms_internal_adapters_left_http_dto.OrderItemDTO:
+    properties:
+      productId:
+        type: string
+      quantity:
+        type: integer
+    required:
+    - productId
+    - quantity
+    type: object
+  github_com_HlufD_order-ms_internal_adapters_left_http_dto.UpdateOrderDTO:
+    properties:
+      isPaid:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/github_com_HlufD_order-ms_internal_adapters_left_http_dto.OrderItemDTO'
+        type: array
+      paymentMethod:
+        type: string
+      status:
+        enum:
+        - pending
+        - processing
+        - shipped
+        - completed
+        - cancelled
+        type: string
+      totalAmount:
+        type: number
+    type: object
+  github_com_HlufD_order-ms_internal_core_domain.Order:
+    properties:
+      createdAt:
+        type: string
+      customerId:
+        type: string
+      id:
+        type: string
+      isPaid:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/github_com_HlufD_order-ms_internal_core_domain.OrderItem'
+        type: array
+      paymentMethod:
+        type: string
+      status:
+        type: string
+      totalAmount:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  github_com_HlufD_order-ms_internal_core_domain.OrderItem:
+    properties:
+      price:
+        type: number
+      productId:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  shared.ErrorResponse:
+    properties:
+      error:
+        example: true
+        type: boolean
+      message:
+        example: Invalid request payload
+        type: string
+    type: object
+host: localhost:4003
+info:
+  contact: {}
+  description: API documentation for the Order service.
+  title: Order Service API
+  version: "1.0"
+paths:
+  /orders:
+    post:
+      consumes:
+      - application/json
+      description: Create an order based on the provided details
+      parameters:
+      - description: Create Order
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HlufD_order-ms_internal_adapters_left_http_dto.CreateOrderDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_HlufD_order-ms_internal_core_domain.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      description: Get details of an order by its ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HlufD_order-ms_internal_core_domain.Order'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+      summary: Get order by ID
+      tags:
+      - Orders
+    put:
+      consumes:
+      - application/json
+      description: Update an order's details by its ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated Order Data
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_HlufD_order-ms_internal_adapters_left_http_dto.UpdateOrderDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_HlufD_order-ms_internal_core_domain.Order'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+      summary: Update an existing order
+      tags:
+      - orders
+  /orders/user:
+    get:
+      description: Get a list of orders for the currently authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/github_com_HlufD_order-ms_internal_core_domain.Order'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/shared.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get orders for the authenticated user
+      tags:
+      - orders
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token (e.g., "Bearer eyJhbGciOi...")
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

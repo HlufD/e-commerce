@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/HlufD/order-ms/internal/adapters/left/http/dto"
 	"github.com/HlufD/order-ms/internal/core/domain"
 	httpports "github.com/HlufD/order-ms/internal/core/ports/left/http"
 	databaseports "github.com/HlufD/order-ms/internal/core/ports/right/persistence"
@@ -42,13 +41,13 @@ func (ou *OrderUseCase) Create(order *domain.Order, token string) (*domain.Order
 		productIDs = append(productIDs, item.ProductID)
 	}
 
-	var products []*dto.Product
+	var products []*domain.Product
 	getProductURL := fmt.Sprintf("%s?ids=%s", os.Getenv("CHECK_AVAILABILITY"), strings.Join(productIDs, ","))
 	if err := ou.httpClient.Get(ctx, getProductURL, &products); err != nil {
 		return nil, fmt.Errorf("failed to fetch products: %w", err)
 	}
 
-	productMap := make(map[string]*dto.Product)
+	productMap := make(map[string]*domain.Product)
 	for _, p := range products {
 		productMap[p.ID] = p
 	}
@@ -100,17 +99,18 @@ func (ou *OrderUseCase) UpdateOrder(orderID string, updatedOrder *domain.UpdateO
 			productIDs = append(productIDs, item.ProductID)
 		}
 
-		var products []*dto.Product
-		getProductURL := fmt.Sprintf("%s?ids=%s", os.Getenv("GET_PRODUCTS_BATCH"), strings.Join(productIDs, ","))
+		var products []*domain.Product
+		getProductURL := fmt.Sprintf("%s?ids=%s", os.Getenv("CHECK_AVAILABILITY"), strings.Join(productIDs, ","))
 		if err := ou.httpClient.Get(context.Background(), getProductURL, &products); err != nil {
 			return nil, fmt.Errorf("failed to fetch products: %w", err)
 		}
 
-		productMap := make(map[string]*dto.Product)
+		productMap := make(map[string]*domain.Product)
 		for _, p := range products {
 			productMap[p.ID] = p
 		}
 
+		var total float64
 		for _, item := range updatedOrder.Items {
 			product, ok := productMap[item.ProductID]
 			if !ok {
@@ -119,9 +119,12 @@ func (ou *OrderUseCase) UpdateOrder(orderID string, updatedOrder *domain.UpdateO
 			if product.Stock < item.Quantity {
 				return nil, fmt.Errorf("insufficient stock for product: %s", product.ID)
 			}
+			total += float64(item.Quantity) * product.Price
 		}
 
 		order.Items = updatedOrder.Items
+		order.TotalAmount = total
+		order.ID = ""
 	}
 
 	if updatedOrder.Status != "" {
@@ -130,18 +133,23 @@ func (ou *OrderUseCase) UpdateOrder(orderID string, updatedOrder *domain.UpdateO
 		}
 
 		order.Status = updatedOrder.Status
+		order.ID = ""
 	}
 
 	if updatedOrder.IsPaid {
 		order.IsPaid = updatedOrder.IsPaid
+		order.ID = ""
 	}
 
 	order.UpdatedAt = time.Now()
 
 	updatedOrderResult, err := ou.orderRepository.Update(orderID, order)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to update order: %w", err)
 	}
+
+	updatedOrderResult.ID = orderID
 
 	return updatedOrderResult, nil
 }

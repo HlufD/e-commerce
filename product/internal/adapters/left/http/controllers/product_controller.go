@@ -31,6 +31,17 @@ func (pc *ProductController) RegisterRoutes(router chi.Router) {
 	})
 }
 
+// CreateProduct godoc
+// @Summary      Create a new product
+// @Description  Adds a new product to the catalog
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        product  body      dto.CreateProduct  true  "Product to create"
+// @Success      201      {object}  domain.Product
+// @Failure      400      {object}  map[string]string
+// @Failure      500      {object}  map[string]string
+// @Router       /products [post]
 func (pc *ProductController) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	var product *domain.Product
 	var createProductDto dto.CreateProduct
@@ -58,6 +69,14 @@ func (pc *ProductController) CreateProduct(w http.ResponseWriter, r *http.Reques
 	shared.RespondWithJSON(w, http.StatusCreated, createdProduct)
 }
 
+// GetAllProducts godoc
+// @Summary      Get all products
+// @Description  Returns all products in the catalog
+// @Tags         products
+// @Produce      json
+// @Success      200  {array}   domain.Product
+// @Failure      500  {object}  map[string]string
+// @Router       /products [get]
 func (pc *ProductController) GetAllProducts(w http.ResponseWriter, r *http.Request) {
 	products, err := pc.productService.GetAllProducts()
 	if err != nil {
@@ -68,6 +87,16 @@ func (pc *ProductController) GetAllProducts(w http.ResponseWriter, r *http.Reque
 	shared.RespondWithJSON(w, http.StatusOK, products)
 }
 
+// GetProductByID godoc
+// @Summary      Get product by ID
+// @Description  Returns a single product by its ID
+// @Tags         products
+// @Produce      json
+// @Param        id   path      string  true  "Product ID"
+// @Success      200  {object}  domain.Product
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /products/{id} [get]
 func (pc *ProductController) GetProductByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	println(id)
@@ -87,6 +116,18 @@ func (pc *ProductController) GetProductByID(w http.ResponseWriter, r *http.Reque
 	shared.RespondWithJSON(w, http.StatusOK, product)
 }
 
+// UpdateProduct godoc
+// @Summary      Update product
+// @Description  Updates a product's information
+// @Tags         products
+// @Accept       json
+// @Produce      json
+// @Param        id       path      string         true  "Product ID"
+// @Param        product  body      dto.UpdateProduct  true  "Updated product data"
+// @Success      200      {object}  domain.Product
+// @Failure      400      {object}  map[string]string
+// @Failure      500      {object}  map[string]string
+// @Router       /products/{id} [put]
 func (pc *ProductController) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
@@ -116,6 +157,16 @@ func (pc *ProductController) UpdateProduct(w http.ResponseWriter, r *http.Reques
 	shared.RespondWithJSON(w, http.StatusOK, updatedProduct)
 }
 
+// GetProductsWithMultipleIdsPassed godoc
+// @Summary      Get products by multiple IDs
+// @Description  Check availability for multiple product IDs
+// @Tags         products
+// @Produce      json
+// @Param        ids  query     string  true  "Comma-separated list of product IDs"  example(1,2,3)
+// @Success      200  {array}   domain.Product
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /products/check-availability [get]
 func (pc *ProductController) GetProductsWithMultipleIdsPassed(w http.ResponseWriter, r *http.Request) {
 	// Get "ids" query param: ?ids=1,2,3
 	idsParam := r.URL.Query().Get("ids")
