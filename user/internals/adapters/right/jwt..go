@@ -21,17 +21,15 @@ func NewJWTAdapter(secret string, expiry time.Duration) *JWTAdapter {
 }
 
 func (jw *JWTAdapter) Generate(id string) (string, error) {
-	// create a claim
+
 	claims := jwt.MapClaims{
 		"sub": id,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(jw.expiry).Unix(),
 	}
 
-	// Create a new JWT token with the claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Sign the token using the secret key
 	signedToken, err := token.SignedString([]byte(jw.secret))
 
 	if err != nil {
@@ -43,7 +41,7 @@ func (jw *JWTAdapter) Generate(id string) (string, error) {
 }
 
 func (jw *JWTAdapter) Validate(tokenString string) (string, error) {
-	// Parse the token using the secret key
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (any, error) {
 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -57,10 +55,8 @@ func (jw *JWTAdapter) Validate(tokenString string) (string, error) {
 		return "", fmt.Errorf("token parsing failed: %w", err)
 	}
 
-	// Check if the token is valid
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 
-		// Extract and return the user ID (sub) from the claims
 		sub, ok := claims["sub"].(string)
 		if !ok {
 			return "", domain.ErrInvalidToken

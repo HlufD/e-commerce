@@ -43,10 +43,8 @@ func main() {
 
 	router := chi.NewRouter()
 
-	// Register routes
 	productController.RegisterRoutes(router)
 
-	// Swagger route - must be registered on the main router
 	router.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 	router.HandleFunc("GET /swagger/*", httpSwagger.WrapHandler)
 

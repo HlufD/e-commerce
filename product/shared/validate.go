@@ -42,9 +42,6 @@ func formatError(fe validator.FieldError) string {
 		return fmt.Sprintf("%s must be a valid email address", fe.Field())
 	case "len":
 		return fmt.Sprintf("%s must be exactly %s characters long", fe.Field(), fe.Param())
-	case "uuid4":
-		return fmt.Sprintf("%s must be a valid UUIDv4", fe.Field())
-	// add more cases as needed
 	default:
 		return fmt.Sprintf("%s is not valid (%s)", fe.Field(), fe.Tag())
 	}

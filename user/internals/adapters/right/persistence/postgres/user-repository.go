@@ -32,7 +32,6 @@ func (ur *UserRepositoryAdapter) Save(ctx context.Context, user *domain.User) (*
 		user.UpdatedAt,
 	)
 
-	// Scan the result into the user struct
 	err := row.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -46,7 +45,6 @@ func (ur *UserRepositoryAdapter) FindById(ctx context.Context, id string) (*doma
 
 	row := ur.db.QueryRowContext(ctx, query, id)
 
-	// Scan the result into a user struct
 	var user domain.User
 
 	err := row.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
@@ -66,7 +64,6 @@ func (ur *UserRepositoryAdapter) FindByUsername(ctx context.Context, username st
 
 	row := ur.db.QueryRowContext(ctx, query, username)
 
-	// Scan the result into a user struct
 	var user domain.User
 
 	err := row.Scan(&user.Id, &user.Username, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)

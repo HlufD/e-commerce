@@ -6,14 +6,7 @@
     "info": {
         "description": "API for user authentication and management",
         "title": "Users Microservice API",
-        "contact": {
-            "name": "API Support",
-            "email": "support@example.com"
-        },
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
+        "contact": {},
         "version": "1.0"
     },
     "host": "localhost:4000",

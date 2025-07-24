@@ -3,7 +3,6 @@ package usecases
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/HlufD/products-ms/internal/core/domain"
 	"github.com/HlufD/products-ms/internal/core/ports/right/persistence"
@@ -24,8 +23,6 @@ func (pu *ProductUseCase) CreateProduct(product *domain.Product) (*domain.Produc
 }
 
 func (pu *ProductUseCase) UpdateProduct(id string, product *domain.UpdateProduct) (*domain.Product, error) {
-	// check if the product exists
-	log.Println(product)
 
 	existingProduct, err := pu.productRepository.GetProductById(id)
 
@@ -64,6 +61,7 @@ func (pu *ProductUseCase) GetProductsWithMultipleIdsPassed(ids []string) ([]*dom
 
 	for _, id := range ids {
 		product, err := pu.GetProductById(id)
+
 		if err != nil {
 			if errors.Is(err, domain.ErrProductNotFound) {
 				notFoundIds = append(notFoundIds, id)
@@ -71,6 +69,7 @@ func (pu *ProductUseCase) GetProductsWithMultipleIdsPassed(ids []string) ([]*dom
 			}
 			return nil, err
 		}
+
 		products = append(products, product)
 	}
 

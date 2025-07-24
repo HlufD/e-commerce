@@ -27,10 +27,10 @@ func NewAuthService(userRepository ports.UserRepositoryPort,
 }
 
 func (au *AuthService) Login(credentials domain.Credentials) (*domain.Token, error) {
-	ctx, close := context.WithTimeout(context.Background(), time.Second*3)
-	defer close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
 	var err error
-	//find the user
+
 	user, err := au.userRepository.FindByUsername(ctx, credentials.Username)
 
 	if err != nil {
@@ -41,14 +41,12 @@ func (au *AuthService) Login(credentials domain.Credentials) (*domain.Token, err
 		return nil, domain.ErrUserNotFound
 	}
 
-	// if the user exists compare the password hash
 	isValid := au.hashing.Compare(user.Password, credentials.Password)
 
 	if !isValid {
 		return nil, domain.ErrInvalidCredentials
 	}
 
-	// if the user credentials are correct then return token
 	token, err := au.token.Generate(user.Id)
 
 	if err != nil {
@@ -60,9 +58,9 @@ func (au *AuthService) Login(credentials domain.Credentials) (*domain.Token, err
 
 func (au *AuthService) Register(registration domain.Registration) (*domain.User, error) {
 	var err error
-	ctx, close := context.WithTimeout(context.Background(), time.Second*3)
-	defer close()
-	// first check of the user is not registered yet
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
+	defer cancel()
+
 	userNameExits, err := au.userRepository.CheckIfUserExists(ctx, "username", registration.Username)
 
 	if err != nil {
@@ -83,7 +81,6 @@ func (au *AuthService) Register(registration domain.Registration) (*domain.User,
 		return nil, domain.ErrEmailExists
 	}
 
-	// hash the password
 	hashedPwd, err := au.hashing.Hash(registration.Password)
 
 	if err != nil {
@@ -98,7 +95,6 @@ func (au *AuthService) Register(registration domain.Registration) (*domain.User,
 		UpdatedAt: time.Now(),
 	}
 
-	// save the user
 	user, err = au.userRepository.Save(ctx, user)
 	log.Println(err)
 
