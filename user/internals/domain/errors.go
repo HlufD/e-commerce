@@ -8,5 +8,4 @@ var (
 	ErrEmailExists        = errors.New("email already exists")
 	ErrUsernameExists     = errors.New("username already exists")
 	ErrInvalidToken       = errors.New("invalid token")
-	ErrExpiredToken       = errors.New("token has expired")
 )
